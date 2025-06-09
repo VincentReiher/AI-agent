@@ -35,13 +35,13 @@ def get_file_content(working_directory, file_path):
         return f'Error: cannot read "{file_path}" as it is outside the permitted working directory'
     
     try:
-        with file_path.open() as f:
+        with open(abs_file_path, "r") as f:
             contents = f.read()
-    except:
+    except FileNotFoundError:
         return f'Error: File not found or is not a regular file: \"{file_path}\"'
     
     if len(contents) > MAXIMUM_FILE_LENGTH:
         contents = contents[:MAXIMUM_FILE_LENGTH]
-        contents += "\n[...File \"{file_path}\" truncated at {MAXIMUM_FILE_LENGTH} characters]"
+        contents += f'\n[...File \"{file_path}\" truncated at {MAXIMUM_FILE_LENGTH} characters]'
 
     return contents
