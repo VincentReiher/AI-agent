@@ -20,6 +20,8 @@ All paths you provide should be relative to the working directory. You do not ne
 
 model_name = 'gemini-2.0-flash-001'
 
+MAXIMUM_LLM_CALLS = 20
+
 def main():
     # Load API key from file
     load_dotenv()
@@ -51,25 +53,39 @@ def main():
         system_instruction=system_prompt,
         tools=[available_functions]
     )
+    LLM_call = 0
+    while(LLM_call < MAXIMUM_LLM_CALLS):
 
-    # Call LLM with user prompt
-    response = client.models.generate_content(model=model_name, 
-                                              contents=messages,
-                                              config=LLM_config)
-    if response.function_calls is not None:
-        for function_call in response.function_calls:
-            function_return = call_function(function_call, verbose=verbose)
-            
-            try:
-                print_message = f"-> {function_return.parts[0].function_response.response}"
-            except AttributeError:
-                raise Exception("FATAL: An unknown error occurred.")
-            
-            if verbose:
-                print(print_message)
-            
-    # if response.text is not None:
-    #     print(response.text)
+        # Call LLM with user prompt
+        response = client.models.generate_content(model=model_name, 
+                                                contents=messages,
+                                                config=LLM_config)
+        
+        if response.candidates != []:
+            for candidate in response.candidates:
+                messages.append(candidate.content)
+
+        if response.function_calls is not None:
+            for function_call in response.function_calls:
+                function_return = call_function(function_call, verbose=verbose)
+                
+                try:
+                    print_message = f"-> {function_return.parts[0].function_response.response}"
+                except AttributeError:
+                    raise Exception("FATAL: An unknown error occurred.")
+                
+                if verbose:
+                    print(print_message)
+
+                messages.append(function_return)
+                
+        if response.function_calls is not None:
+            LLM_call += 1
+            continue
+        else:
+            print(response.text)
+            break
+        
     if verbose:
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")

@@ -29,7 +29,19 @@ def call_function(function_call, verbose=False):
         )
     function_args = function_call.args
     function_args['working_directory'] = WORKING_DIR
-    function_result = FUNCTION_DICT[function_call.name](**function_args)
+    try:
+        function_result = FUNCTION_DICT[function_call.name](**function_args)
+    except TypeError:
+        print(function_args)
+        return genai.types.Content(
+            role="tool",
+            parts=[
+                genai.types.Part.from_function_response(
+                    name=function_call.name,
+                    response={"error": f"Unexpected keyword argument"},
+                )
+            ],
+        )
 
     return genai.types.Content(
             role="tool",
