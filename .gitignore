@@ -1,5 +1,11 @@
 **/__pycache__
 **/lorem.txt
 **/morelorem.txt
+calculator/
+./
+!main.py
+!function_schema.py
+!function_call_handler.py
+
 /venv
 .env

@@ -5,7 +5,10 @@ MAXIMUM_FILE_LENGTH = 10000
 def get_files_info(working_directory, directory=None):
     abs_working_dir = os.path.abspath(working_directory)
 
-    src_dir = os.path.join(working_directory, directory)
+    if directory is None:
+        src_dir = os.path.join(working_directory, ".")
+    else:
+        src_dir = os.path.join(working_directory, directory)
     abs_src_dir = os.path.abspath(src_dir)
 
     if not abs_src_dir.startswith(abs_working_dir):
